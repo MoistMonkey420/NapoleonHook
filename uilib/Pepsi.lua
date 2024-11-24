@@ -477,7 +477,7 @@ local library = {
 		easingDirection = Enum.EasingDirection.Out
 	},
 	colors = {
-		main = Color3.fromRGB(255,165,0),
+		main = Color3.fromRGB(255,140,0),
 		background = Color3.fromRGB(40, 40, 40),
 		outerBorder = Color3.fromRGB(15, 15, 15),
 		innerBorder = Color3.fromRGB(73, 63, 73),
@@ -829,7 +829,7 @@ local keyHandler = {
 		[Enum.UserInputType.MouseMovement] = true,
 		[Enum.UserInputType.MouseWheel] = true,
 		[Enum.UserInputType.MouseButton1] = true,
-		[Enum.UserInputType.MouseButton2] = false,
+		[Enum.UserInputType.MouseButton2] = true,
 		[Enum.UserInputType.MouseButton3] = true
 	},
 	allowedKeys = {
@@ -6890,7 +6890,7 @@ function library:CreateWindow(options, ...)
 				hue.Image = "rbxassetid://3570695787"
 				hue.ScaleType = Enum.ScaleType.Slice
 				hue.SliceScale = 0.01
-				hueGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255,165,0)), ColorSequenceKeypoint.new(0.17, Color3.fromRGB(235, 7, 255)), ColorSequenceKeypoint.new(0.33, Color3:fromRGB(9, 189)), ColorSequenceKeypoint.new(0.5, Color3:fromRGB(193, 196)), ColorSequenceKeypoint.new(0.66, Color3:new(1)), ColorSequenceKeypoint.new(0.84, Color3.fromRGB(255, 247)), ColorSequenceKeypoint.new(1, Color3.new(1))})
+				hueGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 4)), ColorSequenceKeypoint.new(0.17, Color3.fromRGB(235, 7, 255)), ColorSequenceKeypoint.new(0.33, Color3:fromRGB(9, 189)), ColorSequenceKeypoint.new(0.5, Color3:fromRGB(193, 196)), ColorSequenceKeypoint.new(0.66, Color3:new(1)), ColorSequenceKeypoint.new(0.84, Color3.fromRGB(255, 247)), ColorSequenceKeypoint.new(1, Color3.new(1))})
 				hueGradient.Name = "hueGradient"
 				hueGradient.Parent = hue
 				selectorHue.Name = "selectorHue"
