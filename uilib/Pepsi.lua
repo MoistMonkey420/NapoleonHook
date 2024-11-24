@@ -471,7 +471,7 @@ local library = {
 	subs = {},
 	colored = {},
 	configuration = {
-		hideKeybind = Enum.KeyCode.RightShift,
+		hideKeybind = Enum.KeyCode.End,
 		smoothDragging = false,
 		easingStyle = Enum.EasingStyle.Quart,
 		easingDirection = Enum.EasingDirection.Out
@@ -829,7 +829,7 @@ local keyHandler = {
 		[Enum.UserInputType.MouseMovement] = true,
 		[Enum.UserInputType.MouseWheel] = true,
 		[Enum.UserInputType.MouseButton1] = true,
-		[Enum.UserInputType.MouseButton2] = true,
+		[Enum.UserInputType.MouseButton2] = false,
 		[Enum.UserInputType.MouseButton3] = true
 	},
 	allowedKeys = {
@@ -7352,9 +7352,9 @@ function library:CreateWindow(options, ...)
 		}
 		local daaata = {{"AddTextbox", "__Designer.Textbox.ImageAssetID", backgroundsection, {
 			Name = "Image Asset ID",
-			Placeholder = "rbxassetid://4427304036",
+			Placeholder = "rbxassetid://132117128292433",
 			Flag = "__Designer.Background.ImageAssetID",
-			Value = "rbxassetid://4427304036",
+			Value = "rbxassetid://132117128292433",
 			Callback = updatecolorsnotween
 		}}, {"AddColorpicker", "__Designer.Colorpicker.ImageColor", backgroundsection, {
 			Name = "Image Color",
