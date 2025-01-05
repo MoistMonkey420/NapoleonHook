@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.100 [
+Library v0.36 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -878,8 +878,8 @@ local keyHandler = {
 		[Enum.KeyCode.Period] = ".",
 		[Enum.KeyCode.Backquote] = "`",
 		[Enum.UserInputType.MouseButton1] = "MB1",
-    	[Enum.UserInputType.MouseButton2] = "MB2",
-    	[Enum.UserInputType.MouseButton3] = "MB3"
+    		[Enum.UserInputType.MouseButton2] = "MB2", 
+    		[Enum.UserInputType.MouseButton3] = "MB3"
 	}
 }
 local SeverAllConnections = nil
@@ -2631,15 +2631,13 @@ function library:CreateWindow(options, ...)
 						end
 						local receivingKey = nil
 						receivingKey = userInputService.InputBegan:Connect(function(key)
-                            print("Input received:", key.UserInputType, key.KeyCode) -- Debug line
 							if lockedup then
 								return receivingKey:Disconnect()
 							end
 							klast_v = library_flags[kbflag]
 							if not keyHandler.notAllowedKeys[key.KeyCode] then
-								if key.UserInputType and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
-                                    print("Processing mouse input:", key.UserInputType)
-									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode and key.UserInputType) or library_flags[kbflag]
+								if key.KeyCode ~= Enum.KeyCode.Unknown then
+									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode) or library_flags[kbflag]
 									library_flags[kbflag] = bindedKey
 									if options.Location then
 										options.Location[options.LocationFlag or kbflag] = bindedKey
@@ -2660,8 +2658,7 @@ function library:CreateWindow(options, ...)
 										task.spawn(callback, bindedKey, klast_v)
 									end
 									return
-								elseif key.UserInputType and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
-                                    print("Mouse input detected:", key.UserInputType) -- Debug line
+								elseif key.KeyCode == Enum.KeyCode.Unknown and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
 									bindedKey = key.UserInputType
 									library_flags[kbflag] = bindedKey
 									if options.Location then
