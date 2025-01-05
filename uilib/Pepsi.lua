@@ -2697,21 +2697,23 @@ function library:CreateWindow(options, ...)
 						library.signals[1 + #library.signals] = receivingKey
 					end
 					library.signals[1 + #library.signals] = keybindButton.MouseButton1Click:Connect(newkey)
-					if kbpresscallback and not justBinded then
-						library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
-							chatting = chatting or (userInputService:GetFocusedTextBox() and true)
-							if not chatting and not justBinded then
-								if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
-									if bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode then
-										if kbpresscallback then
-											task.spawn(kbpresscallback, key, chatting)
-										end
-									end
-									justBinded = false
-								end
-							end
-						end)
-					end
+                    if kbpresscallback and not justBinded then
+                        library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(input, chatting)
+                            chatting = chatting or (userInputService:GetFocusedTextBox() and true)
+                            if not chatting and not justBinded then
+                                -- Check if the input is not disallowed
+                                if not keyHandler.notAllowedKeys[input.KeyCode] and not keyHandler.notAllowedMouseInputs[input.UserInputType] then
+                                    -- Check if the input matches the bound key
+                                    if bindedKey == input.UserInputType or bindedKey == input.KeyCode then
+                                        if kbpresscallback then
+                                            task.spawn(kbpresscallback, input, chatting)
+                                        end
+                                    end
+                                    justBinded = false
+                                end
+                            end
+                        end)
+                    end
 					options.Mode = (options.Mode and string.lower(tostring(options.Mode))) or "dynamic"
 					local modes = {
 						dynamic = 1,
