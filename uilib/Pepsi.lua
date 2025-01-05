@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.36111 [
+Library v0.999 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -2701,8 +2701,14 @@ function library:CreateWindow(options, ...)
                         library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(input, chatting)
                             chatting = chatting or (userInputService:GetFocusedTextBox() and true)
                             if not chatting and not justBinded then
-                                -- Check if the input is not disallowed
-                                if not keyHandler.notAllowedKeys[input.KeyCode] and not keyHandler.notAllowedMouseInputs[input.UserInputType] then
+                                -- Check if the input is a valid key or mouse input
+                                local isAllowedInput = 
+                                    (input.UserInputType == Enum.UserInputType.MouseButton1 or 
+                                    input.UserInputType == Enum.UserInputType.MouseButton2 or 
+                                    input.UserInputType == Enum.UserInputType.MouseButton3 or 
+                                    not keyHandler.notAllowedKeys[input.KeyCode])
+                                
+                                if isAllowedInput then
                                     -- Check if the input matches the bound key
                                     if bindedKey == input.UserInputType or bindedKey == input.KeyCode then
                                         if kbpresscallback then
