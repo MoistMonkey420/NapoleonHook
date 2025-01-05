@@ -2658,7 +2658,7 @@ function library:CreateWindow(options, ...)
 										task.spawn(callback, bindedKey, klast_v)
 									end
 									return
-								elseif key.KeyCode == Enum.KeyCode.Unknown and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+								elseif key.UserInputType and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
 									bindedKey = key.UserInputType
 									library_flags[kbflag] = bindedKey
 									if options.Location then
