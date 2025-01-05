@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.8181818 [
+Library v0.36 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -827,7 +827,10 @@ local keyHandler = {
 	},
 	notAllowedMouseInputs = {
 		[Enum.UserInputType.MouseMovement] = true,
-		[Enum.UserInputType.MouseWheel] = true
+		[Enum.UserInputType.MouseWheel] = true,
+		[Enum.UserInputType.MouseButton1] = true,
+		[Enum.UserInputType.MouseButton2] = true,
+		[Enum.UserInputType.MouseButton3] = true
 	},
 	allowedKeys = {
 		[Enum.KeyCode.LeftShift] = "LShift",
@@ -873,10 +876,7 @@ local keyHandler = {
 		[Enum.KeyCode.Asterisk] = "*",
 		[Enum.KeyCode.Plus] = "+",
 		[Enum.KeyCode.Period] = ".",
-		[Enum.KeyCode.Backquote] = "`",
-        [Enum.UserInputType.MouseButton1] = "MB1",
-        [Enum.UserInputType.MouseButton2] = "MB2",
-        [Enum.UserInputType.MouseButton3] = "MB3"
+		[Enum.KeyCode.Backquote] = "`"
 	}
 }
 local SeverAllConnections = nil
@@ -2696,21 +2696,18 @@ function library:CreateWindow(options, ...)
 					library.signals[1 + #library.signals] = keybindButton.MouseButton1Click:Connect(newkey)
 					if kbpresscallback and not justBinded then
 						library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
-                            chatting = chatting or (userInputService:GetFocusedTextBox() and true)
-                            if not chatting and not justBinded then
-                                local isMouseInput = (key.UserInputType == Enum.UserInputType.MouseButton1 or 
-                                                    key.UserInputType == Enum.UserInputType.MouseButton2 or 
-                                                    key.UserInputType == Enum.UserInputType.MouseButton3)
-                                
-                                if (isMouseInput and bindedKey == key.UserInputType) or
-                                   (not isMouseInput and not keyHandler.notAllowedKeys[key.KeyCode] and bindedKey == key.KeyCode) then
-                                    if kbpresscallback then
-                                        task.spawn(kbpresscallback, key, chatting)
-                                    end
-                                end
-                                justBinded = false
-                            end
-                        end)
+							chatting = chatting or (userInputService:GetFocusedTextBox() and true)
+							if not chatting and not justBinded then
+								if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+									if bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode then
+										if kbpresscallback then
+											task.spawn(kbpresscallback, key, chatting)
+										end
+									end
+									justBinded = false
+								end
+							end
+						end)
 					end
 					options.Mode = (options.Mode and string.lower(tostring(options.Mode))) or "dynamic"
 					local modes = {
@@ -3713,90 +3710,82 @@ function library:CreateWindow(options, ...)
 						keybindButton.Text = "[...]"
 					end
 					local receivingKey = nil
-                    receivingKey = userInputService.InputBegan:Connect(function(input)
-                        if lockedup then
-                            return receivingKey:Disconnect()
-                        end
-                        last_v = library_flags[flag]
-                        
-                        -- Handle mouse inputs directly
-                        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-                        input.UserInputType == Enum.UserInputType.MouseButton2 or 
-                        input.UserInputType == Enum.UserInputType.MouseButton3 then
-                            
-                            bindedKey = input.UserInputType
-                            library_flags[flag] = bindedKey
-                            if options.Location then
-                                options.Location[options.LocationFlag or flag] = bindedKey
-                            end
-                            keyName = keyHandler.allowedKeys[bindedKey]
-                            keybindButton.Text = "[" .. (keyName or "MB" .. tostring(bindedKey):match("%d+")) .. "]"
-                            keybindButton.Size = UDim2.fromOffset(textToSize(keybindButton).X + 4, 12)
-                            justBinded = true
-                            colored_keybindButton_TextColor3[3] = "otherElementText"
-                            colored_keybindButton_TextColor3[4] = nil
-                            tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
-                                TextColor3 = library.colors.otherElementText
-                            }):Play()
-                            receivingKey:Disconnect()
-                            if callback and last_v ~= bindedKey then
-                                task.spawn(callback, bindedKey, last_v)
-                            end
-                            return
-                            
-                        -- Handle keyboard inputs
-                        elseif input.UserInputType == Enum.UserInputType.Keyboard then
-                            if not keyHandler.notAllowedKeys[input.KeyCode] then
-                                if input.KeyCode ~= Enum.KeyCode.Unknown then
-                                    bindedKey = (input.KeyCode ~= Enum.KeyCode.Escape and input.KeyCode) or library_flags[flag]
-                                    library_flags[flag] = bindedKey
-                                    if options.Location then
-                                        options.Location[options.LocationFlag or flag] = bindedKey
-                                    end
-                                    if bindedKey then
-                                        keyName = keyHandler.allowedKeys[bindedKey]
-                                        keybindButton.Text = "[" .. (keyName or bindedKey.Name or tostring(input.KeyCode):gsub("Enum.KeyCode.", "")) .. "]"
-                                        keybindButton.Size = UDim2.fromOffset(textToSize(keybindButton).X + 4, 12)
-                                        justBinded = true
-                                        colored_keybindButton_TextColor3[3] = "otherElementText"
-                                        colored_keybindButton_TextColor3[4] = nil
-                                        tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
-                                            TextColor3 = library.colors.otherElementText
-                                        }):Play()
-                                        receivingKey:Disconnect()
-                                    end
-                                    if callback and last_v ~= bindedKey then
-                                        task.spawn(callback, bindedKey, last_v)
-                                    end
-                                    if IsCore then
-                                        delay(0.1, function()
-                                            if IgnoreCoreInputs and (IgnoreCoreInputs == IgnoreKey) then
-                                                IgnoreCoreInputs = nil
-                                            end
-                                        end)
-                                    end
-                                    return
-                                end
-                            end
-                        end
-                        
-                        -- Handle escape/backspace
-                        if input.KeyCode == Enum.KeyCode.Backspace or input.KeyCode == Enum.KeyCode.Escape then
-                            old_texts, bindedKey = "[NONE]", nil
-                        end
-                        
-                        keybindButton.Text = old_texts
-                        colored_keybindButton_TextColor3[3] = "otherElementText"
-                        colored_keybindButton_TextColor3[4] = nil
-                        tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
-                            TextColor3 = library.colors.otherElementText
-                        }):Play()
-                        receivingKey:Disconnect()
-                        if callback and last_v ~= bindedKey then
-                            task.spawn(callback, bindedKey, last_v)
-                        end
-                    end)
-                    library.signals[1 + #library.signals] = receivingKey
+					receivingKey = userInputService.InputBegan:Connect(function(key)
+						last_v = library_flags[flag]
+						if not keyHandler.notAllowedKeys[key.KeyCode] then
+							if key.KeyCode ~= Enum.KeyCode.Unknown then
+								bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode) or library_flags[flag]
+								library_flags[flag] = bindedKey
+								if options.Location then
+									options.Location[options.LocationFlag or flag] = bindedKey
+								end
+								if bindedKey then
+									keyName = keyHandler.allowedKeys[bindedKey]
+									keybindButton.Text = "[" .. (keyName or bindedKey.Name or tostring(key.KeyCode):gsub("Enum.KeyCode.", "")) .. "]"
+									keybindButton.Size = UDim2.fromOffset(textToSize(keybindButton).X + 4, 12)
+									justBinded = true
+									colored_keybindButton_TextColor3[3] = "otherElementText"
+									colored_keybindButton_TextColor3[4] = nil
+									tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
+										TextColor3 = library.colors.otherElementText
+									}):Play()
+									receivingKey:Disconnect()
+								end
+								if callback and last_v ~= bindedKey then
+									task.spawn(callback, bindedKey, last_v)
+								end
+								if IsCore then
+									delay(0.1, function()
+										if IgnoreCoreInputs and (IgnoreCoreInputs == IgnoreKey) then
+											IgnoreCoreInputs = nil
+										end
+									end)
+								end
+								return
+							elseif key.KeyCode == Enum.KeyCode.Unknown and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+								bindedKey = key.UserInputType
+								library_flags[flag] = bindedKey
+								if options.Location then
+									options.Location[options.LocationFlag or flag] = bindedKey
+								end
+								keyName = keyHandler.allowedKeys[bindedKey]
+								keybindButton.Text = "[" .. (keyName or bindedKey.Name or tostring(key.KeyCode):gsub("Enum.KeyCode.", "")) .. "]"
+								keybindButton.Size = UDim2.fromOffset(textToSize(keybindButton).X + 4, 12)
+								justBinded = true
+								colored_keybindButton_TextColor3[3] = "otherElementText"
+								colored_keybindButton_TextColor3[4] = nil
+								tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
+									TextColor3 = library.colors.otherElementText
+								}):Play()
+								receivingKey:Disconnect()
+								if callback and last_v ~= bindedKey then
+									task.spawn(callback, bindedKey, last_v)
+								end
+								if IsCore then
+									delay(0.1, function()
+										if IgnoreCoreInputs and (IgnoreCoreInputs == IgnoreKey) then
+											IgnoreCoreInputs = nil
+										end
+									end)
+								end
+								return
+							end
+						end
+						if key.KeyCode == Enum.KeyCode.Backspace or Enum.KeyCode.Escape == key.KeyCode then
+							old_texts, bindedKey = "[NONE]", nil
+						end
+						keybindButton.Text = old_texts
+						colored_keybindButton_TextColor3[3] = "otherElementText"
+						colored_keybindButton_TextColor3[4] = nil
+						tweenService:Create(keybindButton, TweenInfo.new(0.35, library.configuration.easingStyle, library.configuration.easingDirection), {
+							TextColor3 = library.colors.otherElementText
+						}):Play()
+						receivingKey:Disconnect()
+						if callback and last_v ~= bindedKey then
+							task.spawn(callback, bindedKey, last_v)
+						end
+					end)
+					library.signals[1 + #library.signals] = receivingKey
 				end
 				library.signals[1 + #library.signals] = keybindButton.MouseButton1Click:Connect(newkey)
 				library.signals[1 + #library.signals] = newKeybind.InputEnded:Connect(function(input)
