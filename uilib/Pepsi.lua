@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.36 [
+Library v0.69 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
