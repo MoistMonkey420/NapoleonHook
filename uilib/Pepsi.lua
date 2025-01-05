@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.36 [
+Library v0.111 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -2637,7 +2637,7 @@ function library:CreateWindow(options, ...)
 							klast_v = library_flags[kbflag]
 							if not keyHandler.notAllowedKeys[key.KeyCode] then
 								if key.KeyCode ~= Enum.KeyCode.Unknown then
-									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode) or library_flags[kbflag]
+									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode or key.UserInputType) or library_flags[kbflag]
 									library_flags[kbflag] = bindedKey
 									if options.Location then
 										options.Location[options.LocationFlag or kbflag] = bindedKey
