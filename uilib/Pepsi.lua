@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.36 [
+Library v0.31111 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -827,10 +827,7 @@ local keyHandler = {
 	},
 	notAllowedMouseInputs = {
 		[Enum.UserInputType.MouseMovement] = true,
-		[Enum.UserInputType.MouseWheel] = true,
-		[Enum.UserInputType.MouseButton1] = true,
-		[Enum.UserInputType.MouseButton2] = true,
-		[Enum.UserInputType.MouseButton3] = true
+		[Enum.UserInputType.MouseWheel] = true
 	},
 	allowedKeys = {
 		[Enum.KeyCode.LeftShift] = "LShift",
@@ -876,7 +873,10 @@ local keyHandler = {
 		[Enum.KeyCode.Asterisk] = "*",
 		[Enum.KeyCode.Plus] = "+",
 		[Enum.KeyCode.Period] = ".",
-		[Enum.KeyCode.Backquote] = "`"
+		[Enum.KeyCode.Backquote] = "`",
+        [Enum.UserInputType.MouseButton1] = "Mouse1",
+        [Enum.UserInputType.MouseButton2] = "Mouse2", 
+        [Enum.UserInputType.MouseButton3] = "Mouse3"
 	}
 }
 local SeverAllConnections = nil
@@ -2696,18 +2696,27 @@ function library:CreateWindow(options, ...)
 					library.signals[1 + #library.signals] = keybindButton.MouseButton1Click:Connect(newkey)
 					if kbpresscallback and not justBinded then
 						library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
-							chatting = chatting or (userInputService:GetFocusedTextBox() and true)
-							if not chatting and not justBinded then
-								if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
-									if bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode then
-										if kbpresscallback then
-											task.spawn(kbpresscallback, key, chatting)
-										end
-									end
-									justBinded = false
-								end
-							end
-						end)
+                            chatting = chatting or (userInputService:GetFocusedTextBox() and true)
+                            if not chatting and not justBinded then
+                                -- Allow mouse input binds (only block mouse movement/wheel)
+                                local isMouseInput = (key.UserInputType == Enum.UserInputType.MouseButton1 or 
+                                                    key.UserInputType == Enum.UserInputType.MouseButton2 or 
+                                                    key.UserInputType == Enum.UserInputType.MouseButton3)
+                                                    
+                                if (isMouseInput or not keyHandler.notAllowedKeys[key.KeyCode]) and 
+                                   (isMouseInput or not keyHandler.notAllowedMouseInputs[key.UserInputType]) then
+                                    
+                                    -- Check for either mouse input or keyboard input match
+                                    if (isMouseInput and bindedKey == key.UserInputType) or
+                                       (not isMouseInput and bindedKey == key.KeyCode) then
+                                        if kbpresscallback then
+                                            task.spawn(kbpresscallback, key, chatting)
+                                        end
+                                    end
+                                    justBinded = false
+                                end
+                            end
+                        end)
 					end
 					options.Mode = (options.Mode and string.lower(tostring(options.Mode))) or "dynamic"
 					local modes = {
