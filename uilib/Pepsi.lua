@@ -876,7 +876,10 @@ local keyHandler = {
 		[Enum.KeyCode.Asterisk] = "*",
 		[Enum.KeyCode.Plus] = "+",
 		[Enum.KeyCode.Period] = ".",
-		[Enum.KeyCode.Backquote] = "`"
+		[Enum.KeyCode.Backquote] = "`",
+		[Enum.UserInputType.MouseButton1] = "MB1",
+    		[Enum.UserInputType.MouseButton2] = "MB2", 
+    		[Enum.UserInputType.MouseButton3] = "MB3"
 	}
 }
 local SeverAllConnections = nil
