@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.56 [
+Library v0.100 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -2637,8 +2637,9 @@ function library:CreateWindow(options, ...)
 							end
 							klast_v = library_flags[kbflag]
 							if not keyHandler.notAllowedKeys[key.KeyCode] then
-								if key.KeyCode ~= Enum.KeyCode.Unknown then
-									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode) or library_flags[kbflag]
+								if key.UserInputType and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+                                    print("Processing mouse input:", key.UserInputType)
+									bindedKey = (key.KeyCode ~= Enum.KeyCode.Escape and key.KeyCode and key.UserInputType) or library_flags[kbflag]
 									library_flags[kbflag] = bindedKey
 									if options.Location then
 										options.Location[options.LocationFlag or kbflag] = bindedKey
