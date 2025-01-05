@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.69 [
+Library v0.56 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -878,8 +878,8 @@ local keyHandler = {
 		[Enum.KeyCode.Period] = ".",
 		[Enum.KeyCode.Backquote] = "`",
 		[Enum.UserInputType.MouseButton1] = "MB1",
-    		[Enum.UserInputType.MouseButton2] = "MB2", 
-    		[Enum.UserInputType.MouseButton3] = "MB3"
+    	[Enum.UserInputType.MouseButton2] = "MB2",
+    	[Enum.UserInputType.MouseButton3] = "MB3"
 	}
 }
 local SeverAllConnections = nil
@@ -2631,6 +2631,7 @@ function library:CreateWindow(options, ...)
 						end
 						local receivingKey = nil
 						receivingKey = userInputService.InputBegan:Connect(function(key)
+                            print("Input received:", key.UserInputType, key.KeyCode) -- Debug line
 							if lockedup then
 								return receivingKey:Disconnect()
 							end
@@ -2659,6 +2660,7 @@ function library:CreateWindow(options, ...)
 									end
 									return
 								elseif key.UserInputType and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+                                    print("Mouse input detected:", key.UserInputType) -- Debug line
 									bindedKey = key.UserInputType
 									library_flags[kbflag] = bindedKey
 									if options.Location then
