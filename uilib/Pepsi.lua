@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.36 [
+Library v0.22222 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -2655,7 +2655,7 @@ function library:CreateWindow(options, ...)
 										task.spawn(callback, bindedKey, klast_v)
 									end
 									return
-								elseif key.KeyCode == Enum.KeyCode.Unknown and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+								elseif key.KeyCode == Enum.KeyCode.Unknown then
 									bindedKey = key.UserInputType
 									library_flags[kbflag] = bindedKey
 									if options.Location then
@@ -2698,7 +2698,7 @@ function library:CreateWindow(options, ...)
 						library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
 							chatting = chatting or (userInputService:GetFocusedTextBox() and true)
 							if not chatting and not justBinded then
-								if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+								if not keyHandler.notAllowedKeys[key.KeyCode] then
 									if bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode then
 										if kbpresscallback then
 											task.spawn(kbpresscallback, key, chatting)
@@ -3742,7 +3742,7 @@ function library:CreateWindow(options, ...)
 									end)
 								end
 								return
-							elseif key.KeyCode == Enum.KeyCode.Unknown and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+							elseif key.KeyCode == Enum.KeyCode.Unknown then
 								bindedKey = key.UserInputType
 								library_flags[flag] = bindedKey
 								if options.Location then
@@ -3795,7 +3795,7 @@ function library:CreateWindow(options, ...)
 				end)
 				if presscallback then
 					library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
-						if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+						if not keyHandler.notAllowedKeys[key.KeyCode] then
 							if not justBinded and bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode and not chatting then
 								if presscallback then
 									task.spawn(presscallback, key, chatting)
