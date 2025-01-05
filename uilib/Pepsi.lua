@@ -1,6 +1,6 @@
 --[[ Pepsi's UI Library
 Better and updated web-based docs are planned in distant future.
-Library v0.1111111 [
+Library v0.36 [
     CreateWindow: Function (
         (table | nil) Options [
             (string | nil) Name = "Window Name"
@@ -2697,28 +2697,21 @@ function library:CreateWindow(options, ...)
 						library.signals[1 + #library.signals] = receivingKey
 					end
 					library.signals[1 + #library.signals] = keybindButton.MouseButton1Click:Connect(newkey)
-                    if kbpresscallback and not justBinded then
-                        library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(input, chatting)
-                            chatting = chatting or (userInputService:GetFocusedTextBox() and true)
-                            if not chatting and not justBinded then
-                                -- Determine if the input is allowed
-                                local isAllowedKey = not keyHandler.notAllowedKeys[input.KeyCode]
-                                local isAllowedMouse = (input.UserInputType == Enum.UserInputType.MouseButton1 or
-                                                        input.UserInputType == Enum.UserInputType.MouseButton2 or
-                                                        input.UserInputType == Enum.UserInputType.MouseButton3)
-
-                                if isAllowedKey or isAllowedMouse then
-                                    -- Check if the input matches the bound key or mouse button
-                                    if bindedKey == input.KeyCode or bindedKey == input.UserInputType then
-                                        if kbpresscallback then
-                                            task.spawn(kbpresscallback, input, chatting)
-                                        end
-                                    end
-                                    justBinded = false
-                                end
-                            end
-                        end)
-                    end
+					if kbpresscallback and not justBinded then
+						library.signals[1 + #library.signals] = userInputService.InputBegan:Connect(function(key, chatting)
+							chatting = chatting or (userInputService:GetFocusedTextBox() and true)
+							if not chatting and not justBinded then
+								if not keyHandler.notAllowedKeys[key.KeyCode] and not keyHandler.notAllowedMouseInputs[key.UserInputType] then
+									if bindedKey == key.UserInputType or not justBinded and bindedKey == key.KeyCode then
+										if kbpresscallback then
+											task.spawn(kbpresscallback, key, chatting)
+										end
+									end
+									justBinded = false
+								end
+							end
+						end)
+					end
 					options.Mode = (options.Mode and string.lower(tostring(options.Mode))) or "dynamic"
 					local modes = {
 						dynamic = 1,
