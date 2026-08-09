@@ -23,6 +23,26 @@ local Options = {};
 getgenv().Toggles = Toggles;
 getgenv().Options = Options;
 
+-- Bindable mouse buttons. Roblox does not expose side buttons (MB4/MB5) to
+-- the client at all, so MouseButton1/2/3 is the complete set.
+local MouseButtonTypes = {
+    MB1 = Enum.UserInputType.MouseButton1;
+    MB2 = Enum.UserInputType.MouseButton2;
+    MB3 = Enum.UserInputType.MouseButton3;
+};
+
+local MouseButtonNames = {};
+for Name, InputType in next, MouseButtonTypes do
+    MouseButtonNames[InputType] = Name;
+end;
+
+-- Indexing Enum.KeyCode with an unknown name throws rather than returning nil,
+-- so resolve through a lookup table instead.
+local KeyCodesByName = {};
+for _, EnumItem in next, Enum.KeyCode:GetEnumItems() do
+    KeyCodesByName[EnumItem.Name] = EnumItem;
+end;
+
 local Library = {
     Registry = {};
     RegistryMap = {};
@@ -271,6 +291,12 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
             end;
         end;
     end)
+end;
+
+-- True while the user is typing into a TextBox (chat, name fields, etc).
+-- Keybinds must not fire in that state.
+function Library:IsTyping()
+    return InputService:GetFocusedTextBox() ~= nil;
 end;
 
 function Library:MouseIsOverOpenedFrame()
@@ -1184,12 +1210,14 @@ do
 
                 local Key = KeyPicker.Value;
 
-                if Key == 'MB1' or Key == 'MB2' then
-                    return Key == 'MB1' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
-                        or Key == 'MB2' and InputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2);
-                else
-                    return InputService:IsKeyDown(Enum.KeyCode[KeyPicker.Value]);
+                local MouseButton = MouseButtonTypes[Key];
+
+                if MouseButton then
+                    return InputService:IsMouseButtonPressed(MouseButton);
                 end;
+
+                local KeyCode = KeyCodesByName[Key];
+                return KeyCode ~= nil and InputService:IsKeyDown(KeyCode);
             else
                 return KeyPicker.Toggled;
             end;
@@ -1245,11 +1273,11 @@ do
                         Text = Text .. '.';
                         DisplayLabel.Text = Text;
 
-                        wait(0.4);
+                        task.wait(0.4);
                     end;
                 end);
 
-                wait(0.2);
+                task.wait(0.2);
 
                 local Event;
                 Event = InputService.InputBegan:Connect(function(Input)
@@ -1257,10 +1285,15 @@ do
 
                     if Input.UserInputType == Enum.UserInputType.Keyboard then
                         Key = Input.KeyCode.Name;
-                    elseif Input.UserInputType == Enum.UserInputType.MouseButton1 then
-                        Key = 'MB1';
-                    elseif Input.UserInputType == Enum.UserInputType.MouseButton2 then
-                        Key = 'MB2';
+                    else
+                        Key = MouseButtonNames[Input.UserInputType];
+                    end;
+
+                    -- Unbindable input (scroll wheel, touch, gamepad). Keep
+                    -- listening instead of assigning nil, which used to throw
+                    -- on DisplayLabel.Text and leak this connection.
+                    if not Key then
+                        return;
                     end;
 
                     Break = true;
@@ -1283,12 +1316,12 @@ do
 
         Library:GiveSignal(InputService.InputBegan:Connect(function(Input)
             if (not Picking) then
-                if KeyPicker.Mode == 'Toggle' then
+                if KeyPicker.Mode == 'Toggle' and (not Library:IsTyping()) then
                     local Key = KeyPicker.Value;
+                    local MouseButton = MouseButtonTypes[Key];
 
-                    if Key == 'MB1' or Key == 'MB2' then
-                        if Key == 'MB1' and Input.UserInputType == Enum.UserInputType.MouseButton1
-                        or Key == 'MB2' and Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                    if MouseButton then
+                        if Input.UserInputType == MouseButton then
                             KeyPicker.Toggled = not KeyPicker.Toggled
                             KeyPicker:DoClick()
                         end;
@@ -3604,7 +3637,7 @@ function Library:CreateWindow(...)
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
         if type(Library.ToggleKeybind) == 'table' and Library.ToggleKeybind.Type == 'KeyPicker' then
-            if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode.Name == Library.ToggleKeybind.Value then
+            if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode.Name == Library.ToggleKeybind.Value and (not Processed) then
                 task.spawn(Library.Toggle)
             end
         elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
